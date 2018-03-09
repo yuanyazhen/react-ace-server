@@ -1,0 +1,38 @@
+{
+  "name": "react-ace-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src --out-dir lib",
+    "example": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/yuanyazhen/react-ace-server.git"
+  },
+  "keywords": [
+    "react",
+    "ace-editor"
+  ],
+  "author": "yuan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuanyazhen/react-ace-server/issues"
+  },
+  "homepage": "https://github.com/yuanyazhen/react-ace-server#readme",
+  "dependencies": {
+    "prop-types": "^15.6.1",
+    "react-ace": "^5.9.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  }
+}
