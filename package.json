@@ -1,6 +1,6 @@
 {
-  "name": "react-ace-server",
-  "version": "1.0.0",
+  "name": "react-ace-server2",
+  "version": "1.0.2",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -23,8 +23,8 @@
   },
   "homepage": "https://github.com/yuanyazhen/react-ace-server#readme",
   "dependencies": {
-    "prop-types": "^15.6.1",
-    "react-ace": "^5.9.0"
+    "brace": "^0.11.1",
+    "prop-types": "^15.6.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
