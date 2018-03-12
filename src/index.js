@@ -36,6 +36,7 @@ export default class ReactAce extends Component {
     } = this.props
 
     const ace = require('brace')
+    require('brace/ext/language_tools')
     this.Range = ace.acequire('ace/range').Range
     if(mode) {
       require(`brace/mode/${mode}`)      
@@ -43,7 +44,6 @@ export default class ReactAce extends Component {
     if(theme) {
       require(`brace/theme/${theme}`)
     }
-    // require('brace/ext/language_tools') // 扩展
 
     this.editor = ace.edit(this.refEditor)
 
