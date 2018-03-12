@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import isEqual from 'lodash.isequal'
+
 import { editorOptions, editorEvents } from './editorOptions.js'
 
 export default class ReactAce extends Component {
