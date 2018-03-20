@@ -27,7 +27,7 @@ export default class ReactAce extends Component {
       showGutter,
       wrapEnabled,
       showPrintMargin,
-      scrollMargin = [ 0, 0, 0, 0],
+      scrollMargin = [0, 0, 0, 0],
       keyboardHandler,
       onLoad,
       commands,
@@ -38,10 +38,10 @@ export default class ReactAce extends Component {
     const ace = require('brace')
     require('brace/ext/language_tools')
     this.Range = ace.acequire('ace/range').Range
-    if(mode) {
-      require(`brace/mode/${mode}`)      
+    if (mode) {
+      require(`brace/mode/${mode}`)
     }
-    if(theme) {
+    if (theme) {
       require(`brace/theme/${theme}`)
     }
 
@@ -58,7 +58,12 @@ export default class ReactAce extends Component {
     if (this.props.debounceChangePeriod) {
       this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod)
     }
-    this.editor.renderer.setScrollMargin(scrollMargin[0], scrollMargin[1], scrollMargin[2], scrollMargin[3])
+    this.editor.renderer.setScrollMargin(
+      scrollMargin[0],
+      scrollMargin[1],
+      scrollMargin[2],
+      scrollMargin[3]
+    )
     this.editor.getSession().setMode(`ace/mode/${mode}`)
     this.editor.setTheme(`ace/theme/${theme}`)
     this.editor.setFontSize(fontSize)
@@ -77,13 +82,13 @@ export default class ReactAce extends Component {
     this.editor.getSession().selection.on('changeCursor', this.onCursorChange)
     if (onValidate) {
       this.editor.getSession().on('changeAnnotation', () => {
-        const annotations = this.editor.getSession().getAnnotations()
-        this.props.onValidate(annotations)
+        const annotats = this.editor.getSession().getAnnotations()
+        this.props.onValidate(annotats)
       })
     }
     this.editor.session.on('changeScrollTop', this.onScroll)
     this.editor.getSession().setAnnotations(annotations || [])
-    if(markers && markers.length > 0){
+    if (markers && markers.length > 0) {
       this.handleMarkers(markers)
     }
 
@@ -91,31 +96,32 @@ export default class ReactAce extends Component {
     const availableOptions = this.editor.$options
     for (let i = 0; i < editorOptions.length; i++) {
       const option = editorOptions[i]
-      if (availableOptions.hasOwnProperty(option)) {
+      /* eslint no-prototype-builtins: "error" */
+      if (Object.prototype.hasOwnProperty.call(availableOptions, option)) {
         this.editor.setOption(option, this.props[option])
       } else if (this.props[option]) {
-        console.warn(`ReaceAce: editor option ${option} was activated but not found. Did you need to import a related tool or did you possibly mispell the option?`)
+        console.warn(`ReaceAce: editor option ${option} was activated but not found.
+           Did you need to import a related tool or did you possibly mispell the option?`)
       }
     }
     this.handleOptions(this.props)
 
     if (Array.isArray(commands)) {
-      commands.forEach((command) => {
-        if(typeof command.exec == 'string') {
+      commands.forEach(command => {
+        if (typeof command.exec === 'string') {
           this.editor.commands.bindKey(command.bindKey, command.exec)
-        }
-        else {
+        } else {
           this.editor.commands.addCommand(command)
         }
       })
     }
 
     if (keyboardHandler) {
-      this.editor.setKeyboardHandler('ace/keyboard/' + keyboardHandler)
+      this.editor.setKeyboardHandler(`ace/keyboard/${keyboardHandler}`)
     }
 
     if (className) {
-      this.refEditor.className += ' ' + className
+      this.refEditor.className += ` ${className}`
     }
 
     if (focus) {
@@ -129,17 +135,6 @@ export default class ReactAce extends Component {
     this.editor.resize()
   }
 
-  debounce(fn, delay) {
-    var timer = null
-    return function () {
-      var context = this, args = arguments
-      clearTimeout(timer)
-      timer = setTimeout(function () {
-        fn.apply(context, args)
-      }, delay)
-    }
-  }
-
   componentWillReceiveProps(nextProps) {
     const oldProps = this.props
 
@@ -151,25 +146,25 @@ export default class ReactAce extends Component {
     }
 
     if (nextProps.className !== oldProps.className) {
-      let appliedClasses = this.refEditor.className
-      let appliedClassesArray = appliedClasses.trim().split(' ')
-      let oldClassesArray = oldProps.className.trim().split(' ')
-      oldClassesArray.forEach((oldClass) => {
-        let index = appliedClassesArray.indexOf(oldClass)
+      const appliedClasses = this.refEditor.className
+      const appliedClassesArray = appliedClasses.trim().split(' ')
+      const oldClassesArray = oldProps.className.trim().split(' ')
+      oldClassesArray.forEach(oldClass => {
+        const index = appliedClassesArray.indexOf(oldClass)
         appliedClassesArray.splice(index, 1)
       })
-      this.refEditor.className = ' ' + nextProps.className + ' ' + appliedClassesArray.join(' ')
+      this.refEditor.className = ` ${nextProps.className} ${appliedClassesArray.join(' ')}`
     }
 
     if (nextProps.mode !== oldProps.mode) {
-      this.editor.getSession().setMode('ace/mode/' + nextProps.mode)
+      this.editor.getSession().setMode(`ace/mode/${nextProps.mode}`)
     }
     if (nextProps.theme !== oldProps.theme) {
-      this.editor.setTheme('ace/theme/' + nextProps.theme)
+      this.editor.setTheme(`ace/theme/${nextProps.theme}`)
     }
     if (nextProps.keyboardHandler !== oldProps.keyboardHandler) {
       if (nextProps.keyboardHandler) {
-        this.editor.setKeyboardHandler('ace/keyboard/' + nextProps.keyboardHandler)
+        this.editor.setKeyboardHandler(`ace/keyboard/${nextProps.keyboardHandler}`)
       } else {
         this.editor.setKeyboardHandler(null)
       }
@@ -201,7 +196,8 @@ export default class ReactAce extends Component {
       this.handleScrollMargins(nextProps.scrollMargin)
     }
     if (this.editor && this.editor.getValue() !== nextProps.value) {
-      // editor.setValue is a synchronous function call, change event is emitted before setValue return.
+      // editor.setValue is a synchronous function call,
+      // change event is emitted before setValue return.
       this.silent = true
       const pos = this.editor.session.selection.toJSON()
       this.editor.setValue(nextProps.value, nextProps.cursorStart)
@@ -215,13 +211,9 @@ export default class ReactAce extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if(prevProps.height !== this.props.height || prevProps.width !== this.props.width){
+    if (prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
       this.editor.resize()
     }
-  }
-
-  handleScrollMargins(margins = [0, 0, 0, 0]) {
-    this.editor.renderer.setScrollMargins(margins[0], margins[1], margins[2], margins[3])
   }
 
   componentWillUnmount() {
@@ -243,7 +235,7 @@ export default class ReactAce extends Component {
     }
   }
   onCursorChange(event) {
-    if(this.props.onCursorChange) {
+    if (this.props.onCursorChange) {
       const value = this.editor.getSelection()
       this.props.onCursorChange(value, event)
     }
@@ -261,7 +253,7 @@ export default class ReactAce extends Component {
 
   onBlur(event) {
     if (this.props.onBlur) {
-      this.props.onBlur(event,this.editor)
+      this.props.onBlur(event, this.editor)
     }
   }
 
@@ -283,6 +275,10 @@ export default class ReactAce extends Component {
     }
   }
 
+  handleScrollMargins(margins = [0, 0, 0, 0]) {
+    this.editor.renderer.setScrollMargins(margins[0], margins[1], margins[2], margins[3])
+  }
+
   handleOptions(props) {
     const setOptions = Object.keys(props.setOptions)
     for (let y = 0; y < setOptions.length; y++) {
@@ -294,14 +290,16 @@ export default class ReactAce extends Component {
     // remove foreground markers
     let currentMarkers = this.editor.getSession().getMarkers(true)
     for (const i in currentMarkers) {
-      if (currentMarkers.hasOwnProperty(i)) {
+      /* eslint no-prototype-builtins: "error" */
+      if (Object.prototype.hasOwnProperty.call(currentMarkers, i)) {
         this.editor.getSession().removeMarker(currentMarkers[i].id)
       }
     }
     // remove background markers
     currentMarkers = this.editor.getSession().getMarkers(false)
     for (const i in currentMarkers) {
-      if (currentMarkers.hasOwnProperty(i)) {
+      /* eslint no-prototype-builtins: "error" */
+      if (Object.prototype.hasOwnProperty.call(currentMarkers, i)) {
         this.editor.getSession().removeMarker(currentMarkers[i].id)
       }
     }
@@ -316,15 +314,27 @@ export default class ReactAce extends Component {
     this.refEditor = item
   }
 
+  debounce(fn, delay) {
+    let timer = null
+    return (...args) => {
+      const context = this
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        fn.apply(context, args)
+      }, delay)
+    }
+  }
+
   render() {
     const { name, width, height, style } = this.props
+
     const divStyle = { width, height, ...style }
     return (
-      <div ref={this.updateRef}
+      <div
         id={name}
+        ref={this.updateRef}
         style={divStyle}
-      >
-      </div>
+      />
     )
   }
 }
@@ -401,12 +411,12 @@ ReactAce.defaultProps = {
   maxLines: null,
   readOnly: false,
   highlightActiveLine: true,
-  showPrintMargin: true,   // ???
+  showPrintMargin: true, // ???
   tabSize: 4,
   cursorStart: 1,
   editorProps: {},
   style: {},
-  scrollMargin: [ 0, 0, 0, 0],
+  scrollMargin: [0, 0, 0, 0],
   setOptions: {},
   wrapEnabled: false,
   enableBasicAutocompletion: false,
