@@ -25,9 +25,7 @@
   "homepage": "https://github.com/yuanyazhen/react-ace-server#readme",
   "dependencies": {
     "lodash.isequal": "^4.5.0",
-    "prop-types": "^15.6.1",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "prop-types": "^15.6.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -42,6 +40,8 @@
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.7.0",
-    "parcel-bundler": "^1.7.0"
+    "parcel-bundler": "^1.7.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
   }
 }

@@ -20,6 +20,7 @@
     "react/no-unused-prop-types": "off",
     "no-restricted-syntax": ["off", "ForInStatement"],
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "import/no-extraneous-dependencies": "off",
     "object-curly-newline": ["error", {
       "ObjectExpression": {
         "multiline": true,
