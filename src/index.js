@@ -1,8 +1,20 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import isEqual from 'lodash.isequal'
+import loadScript from './loadScript'
 
 import { editorOptions, editorEvents } from './editorOptions.js'
+
+const STATIC_HOST = 'http://awp-assets.meituan.net/hfe/fep'
+const PATH = {
+  ace: `${STATIC_HOST}/ace.js`,
+  options: [
+    `${STATIC_HOST}/903970b4d3cfefdf3d1075e8f72cd137/ext_language_tools.js`,
+    `${STATIC_HOST}/62ca63b7273627d5082ab92217fb2c59/ext_searchbox.js`,
+    `${STATIC_HOST}/9b48004d4584f13d26aa819b08d3a911/mode_lua.js`,
+    `${STATIC_HOST}/c380d4a5d81917573e6eb8ce4527268e/theme_tomorrow_night_bright.js`
+  ]
+}
 
 export default class ReactAce extends Component {
   constructor(props) {
@@ -13,126 +25,19 @@ export default class ReactAce extends Component {
   }
 
   componentDidMount() {
-    const {
-      className,
-      onBeforeLoad,
-      onValidate,
-      mode,
-      focus,
-      theme,
-      fontSize,
-      value,
-      defaultValue,
-      cursorStart,
-      showGutter,
-      wrapEnabled,
-      showPrintMargin,
-      scrollMargin = [0, 0, 0, 0],
-      keyboardHandler,
-      onLoad,
-      commands,
-      annotations,
-      markers,
-    } = this.props
+    loadScript(PATH.ace)
+      .then(() => {
+        const { ace } = window
+        ace.config.setModuleUrl(
+          'ace/mode/lua_worker',
+          `${STATIC_HOST}/c6d546c6d5d17278e0296aa9465a38fb/lua_worker.js`
+        )
 
-    const ace = require('brace')
-    require('brace/ext/language_tools')
-    this.Range = ace.acequire('ace/range').Range
-    if (mode) {
-      require(`brace/mode/${mode}`)
-    }
-    if (theme) {
-      require(`brace/theme/${theme}`)
-    }
-
-    this.editor = ace.edit(this.refEditor)
-
-    if (onBeforeLoad) {
-      onBeforeLoad(ace)
-    }
-
-    const editorProps = Object.keys(this.props.editorProps)
-    for (let i = 0; i < editorProps.length; i++) {
-      this.editor[editorProps[i]] = this.props.editorProps[editorProps[i]]
-    }
-    if (this.props.debounceChangePeriod) {
-      this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod)
-    }
-    this.editor.renderer.setScrollMargin(
-      scrollMargin[0],
-      scrollMargin[1],
-      scrollMargin[2],
-      scrollMargin[3]
-    )
-    this.editor.getSession().setMode(`ace/mode/${mode}`)
-    this.editor.setTheme(`ace/theme/${theme}`)
-    this.editor.setFontSize(fontSize)
-    this.editor.getSession().setValue(!defaultValue ? value : defaultValue, cursorStart)
-    this.editor.navigateFileEnd()
-    this.editor.renderer.setShowGutter(showGutter)
-    this.editor.getSession().setUseWrapMode(wrapEnabled)
-    this.editor.setShowPrintMargin(showPrintMargin)
-    this.editor.on('focus', this.onFocus)
-    this.editor.on('blur', this.onBlur)
-    this.editor.on('copy', this.onCopy)
-    this.editor.on('paste', this.onPaste)
-    this.editor.on('change', this.onChange)
-    this.editor.on('input', this.onInput)
-    this.editor.getSession().selection.on('changeSelection', this.onSelectionChange)
-    this.editor.getSession().selection.on('changeCursor', this.onCursorChange)
-    if (onValidate) {
-      this.editor.getSession().on('changeAnnotation', () => {
-        const annotats = this.editor.getSession().getAnnotations()
-        this.props.onValidate(annotats)
+        Promise.all(PATH.options.map(url => loadScript(url)))
+          .then(() => {
+            this.initAceEditor()
+          })
       })
-    }
-    this.editor.session.on('changeScrollTop', this.onScroll)
-    this.editor.getSession().setAnnotations(annotations || [])
-    if (markers && markers.length > 0) {
-      this.handleMarkers(markers)
-    }
-
-    // get a list of possible options to avoid 'misspelled option errors'
-    const availableOptions = this.editor.$options
-    for (let i = 0; i < editorOptions.length; i++) {
-      const option = editorOptions[i]
-      /* eslint no-prototype-builtins: "error" */
-      if (Object.prototype.hasOwnProperty.call(availableOptions, option)) {
-        this.editor.setOption(option, this.props[option])
-      } else if (this.props[option]) {
-        console.warn(`ReaceAce: editor option ${option} was activated but not found.
-           Did you need to import a related tool or did you possibly mispell the option?`)
-      }
-    }
-    this.handleOptions(this.props)
-
-    if (Array.isArray(commands)) {
-      commands.forEach(command => {
-        if (typeof command.exec === 'string') {
-          this.editor.commands.bindKey(command.bindKey, command.exec)
-        } else {
-          this.editor.commands.addCommand(command)
-        }
-      })
-    }
-
-    if (keyboardHandler) {
-      this.editor.setKeyboardHandler(`ace/keyboard/${keyboardHandler}`)
-    }
-
-    if (className) {
-      this.refEditor.className += ` ${className}`
-    }
-
-    if (focus) {
-      this.editor.focus()
-    }
-
-    if (onLoad) {
-      onLoad(this.editor)
-    }
-
-    this.editor.resize()
   }
 
   componentWillReceiveProps(nextProps) {
@@ -275,6 +180,122 @@ export default class ReactAce extends Component {
     }
   }
 
+  initAceEditor() {
+    const {
+      className,
+      onBeforeLoad,
+      onValidate,
+      mode,
+      focus,
+      theme,
+      fontSize,
+      value,
+      defaultValue,
+      cursorStart,
+      showGutter,
+      wrapEnabled,
+      showPrintMargin,
+      scrollMargin = [0, 0, 0, 0],
+      keyboardHandler,
+      onLoad,
+      commands,
+      annotations,
+      markers,
+    } = this.props
+
+
+    // this.Range = ace.acequire('ace/range').Range
+    const { ace } = window
+    this.editor = ace.edit(this.refEditor)
+
+    if (onBeforeLoad) {
+      onBeforeLoad(ace)
+    }
+
+    const editorProps = Object.keys(this.props.editorProps)
+    for (let i = 0; i < editorProps.length; i++) {
+      this.editor[editorProps[i]] = this.props.editorProps[editorProps[i]]
+    }
+    if (this.props.debounceChangePeriod) {
+      this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod)
+    }
+    this.editor.renderer.setScrollMargin(
+      scrollMargin[0],
+      scrollMargin[1],
+      scrollMargin[2],
+      scrollMargin[3]
+    )
+    this.editor.getSession().setMode(`ace/mode/${mode}`)
+    this.editor.setTheme(`ace/theme/${theme}`)
+    this.editor.setFontSize(fontSize)
+    this.editor.getSession().setValue(!defaultValue ? value : defaultValue, cursorStart)
+    this.editor.navigateFileEnd()
+    this.editor.renderer.setShowGutter(showGutter)
+    this.editor.getSession().setUseWrapMode(wrapEnabled)
+    this.editor.setShowPrintMargin(showPrintMargin)
+    this.editor.on('focus', this.onFocus)
+    this.editor.on('blur', this.onBlur)
+    this.editor.on('copy', this.onCopy)
+    this.editor.on('paste', this.onPaste)
+    this.editor.on('change', this.onChange)
+    this.editor.on('input', this.onInput)
+    this.editor.getSession().selection.on('changeSelection', this.onSelectionChange)
+    this.editor.getSession().selection.on('changeCursor', this.onCursorChange)
+    if (onValidate) {
+      this.editor.getSession().on('changeAnnotation', () => {
+        const annotats = this.editor.getSession().getAnnotations()
+        this.props.onValidate(annotats)
+      })
+    }
+    this.editor.session.on('changeScrollTop', this.onScroll)
+    this.editor.getSession().setAnnotations(annotations || [])
+    if (markers && markers.length > 0) {
+      this.handleMarkers(markers)
+    }
+
+    // get a list of possible options to avoid 'misspelled option errors'
+    const availableOptions = this.editor.$options
+    for (let i = 0; i < editorOptions.length; i++) {
+      const option = editorOptions[i]
+      /* eslint no-prototype-builtins: "error" */
+      if (Object.prototype.hasOwnProperty.call(availableOptions, option)) {
+        this.editor.setOption(option, this.props[option])
+      } else if (this.props[option]) {
+        console.warn(`ReaceAce: editor option ${option} was activated but not found.
+           Did you need to import a related tool or did you possibly mispell the option?`)
+      }
+    }
+    this.handleOptions(this.props)
+
+    if (Array.isArray(commands)) {
+      commands.forEach(command => {
+        if (typeof command.exec === 'string') {
+          this.editor.commands.bindKey(command.bindKey, command.exec)
+        } else {
+          this.editor.commands.addCommand(command)
+        }
+      })
+    }
+
+    if (keyboardHandler) {
+      this.editor.setKeyboardHandler(`ace/keyboard/${keyboardHandler}`)
+    }
+
+    if (className) {
+      this.refEditor.className += ` ${className}`
+    }
+
+    if (focus) {
+      this.editor.focus()
+    }
+
+    if (onLoad) {
+      onLoad(this.editor)
+    }
+
+    this.editor.resize()
+  }
+
   handleScrollMargins(margins = [0, 0, 0, 0]) {
     this.editor.renderer.setScrollMargins(margins[0], margins[1], margins[2], margins[3])
   }
@@ -286,7 +307,7 @@ export default class ReactAce extends Component {
     }
   }
 
-  handleMarkers(markers) {
+  handleMarkers() {
     // remove foreground markers
     let currentMarkers = this.editor.getSession().getMarkers(true)
     for (const i in currentMarkers) {
@@ -304,10 +325,12 @@ export default class ReactAce extends Component {
       }
     }
     // add new markers
-    markers.forEach(({ startRow, startCol, endRow, endCol, className, type, inFront = false }) => {
-      const range = new this.Range(startRow, startCol, endRow, endCol)
-      this.editor.getSession().addMarker(range, className, type, inFront)
-    })
+    // markers.forEach(
+    //   ({ startRow, startCol, endRow, endCol, className, type, inFront = false }) => {
+    //     const range = new this.Range(startRow, startCol, endRow, endCol)
+    //     this.editor.getSession().addMarker(range, className, type, inFront)
+    //   }
+    // )
   }
 
   updateRef(item) {
