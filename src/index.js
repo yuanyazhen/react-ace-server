@@ -5,7 +5,7 @@ import loadScript from './loadScript'
 
 import { editorOptions, editorEvents } from './editorOptions.js'
 
-const STATIC_HOST = 'http://awp-assets.meituan.net/hfe/fep'
+const STATIC_HOST = '//awp-assets.meituan.net/hfe/fep'
 const PATH = {
   ace: `${STATIC_HOST}/ace.js`,
   options: [
