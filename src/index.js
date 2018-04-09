@@ -5,17 +5,6 @@ import loadScript from './loadScript'
 
 import { editorOptions, editorEvents } from './editorOptions.js'
 
-const STATIC_HOST = '//awp-assets.meituan.net/hfe/fep'
-const PATH = {
-  ace: `${STATIC_HOST}/ace.js`,
-  options: [
-    `${STATIC_HOST}/903970b4d3cfefdf3d1075e8f72cd137/ext_language_tools.js`,
-    `${STATIC_HOST}/62ca63b7273627d5082ab92217fb2c59/ext_searchbox.js`,
-    `${STATIC_HOST}/9b48004d4584f13d26aa819b08d3a911/mode_lua.js`,
-    `${STATIC_HOST}/c380d4a5d81917573e6eb8ce4527268e/theme_tomorrow_night_bright.js`
-  ]
-}
-
 export default class ReactAce extends Component {
   constructor(props) {
     super(props)
@@ -25,15 +14,26 @@ export default class ReactAce extends Component {
   }
 
   componentDidMount() {
-    loadScript(PATH.ace)
-      .then(() => {
-        const { ace } = window
-        ace.config.setModuleUrl(
-          'ace/mode/lua_worker',
-          `${STATIC_HOST}/c6d546c6d5d17278e0296aa9465a38fb/lua_worker.js`
-        )
+    const { assetsPath } = this.props
+    const path = {
+      ace: `${assetsPath}/ace.js`,
+      options: [
+        `${assetsPath}/ext_language_tools.js`,
+        `${assetsPath}/ext_searchbox.js`,
+        `${assetsPath}/mode_lua.js`,
+        `${assetsPath}/theme_tomorrow_night_bright.js`
+      ]
+    }
 
-        Promise.all(PATH.options.map(url => loadScript(url)))
+    loadScript(path.ace)
+      .then(() => {
+        // const { ace } = window
+        // ace.config.setModuleUrl(
+        //   'ace/mode/lua_worker',
+        //   `${assetsPath}/lua_worker.js`
+        // )
+
+        Promise.all(path.options.map(url => loadScript(url)))
           .then(() => {
             this.initAceEditor()
           })
@@ -374,6 +374,7 @@ ReactAce.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
+  assetsPath: PropTypes.string,
   showGutter: PropTypes.bool,
   onChange: PropTypes.func,
   onCopy: PropTypes.func,
@@ -444,4 +445,5 @@ ReactAce.defaultProps = {
   wrapEnabled: false,
   enableBasicAutocompletion: false,
   enableLiveAutocompletion: false,
+  assetsPath: '',
 }
